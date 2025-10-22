@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sales Analysis Dashboard</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23667EEA' d='M13 14H11V9H13V14ZM13 18H11V16H13V18ZM1 20V4H23V20H1ZM3 18H21V6H3V18Z'/%3E%3C/svg%3E">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+        :root {
+            --primary-color: #667EEA; /* Indigo-500 */
+            --primary-light: #8DA2FB; /* Lighter Indigo */
+            --primary-dark: #4F64BB; /* Darker Indigo */
+            --accent-color: #38B2AC; /* Teal-400 */
+            --background-color: #F8FAFC; /* Slate-50 */
+            --card-background: #FFFFFF;
+            --text-color: #334155; /* Slate-700 */
+            --text-light: #64748B; /* Slate-500 */
+            --border-color: #E2E8F0; /* Slate-200 */
+            --shadow-light: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+            --shadow-medium: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --breakpoint-sm: 640px;
+            --breakpoint-md: 768px;
+            --breakpoint-lg: 1024px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--background-color);
+            padding: 20px;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            gap: 24px;
+            grid-template-columns: 1fr;
+        }
+
+        @media (min-width: var(--breakpoint-md)) {
+            .container {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (min-width: var(--breakpoint-lg)) {
+            .container {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        header {
+            grid-column: 1 / -1;
+            background-color: var(--card-background);
+            padding: 24px 32px;
+            border-radius: 12px;
+            box-shadow: var(--shadow-medium);
+            margin-bottom: 24px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        header h1 {
+            color: var(--primary-color);
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        header p {
+            color: var(--text-light);
+            font-size: 1.1rem;
+            max-width: 700px;
+        }
+
+        .card {
+            background-color: var(--card-background);
+            border-radius: 12px;
+            box-shadow: var(--shadow-light);
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-medium);
+        }
+
+        .card h2 {
+            font-size: 1.5rem;
+            color: var(--primary-dark);
+            margin-bottom: 16px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 12px;
+        }
+
+        .card-content {
+            flex-grow: 1;
+        }
+
+        .metric-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 16px;
+        }
+
+        @media (min-width: var(--breakpoint-sm)) {
+            .metric-grid {
+                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            }
+        }
+
+        .metric-item {
+            background-color: var(--background-color);
+            padding: 16px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            text-align: center;
+        }
+
+        .metric-item strong {
+            display: block;
+            font-size: 1.1rem;
+            color: var(--text-color);
+            margin-bottom: 4px;
+            font-weight: 600;
+        }
+
+        .metric-item span {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            display: block;
+        }
+
+        .list-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px dashed var(--border-color);
+            font-size: 0.95rem;
+        }
+
+        .list-item:last-child {
+            border-bottom: none;
+        }
+
+        .list-item span:first-child {
+            font-weight: 500;
+            color: var(--text-color);
+        }
+
+        .list-item span:last-child {
+            font-weight: 600;
+            color: var(--primary-dark);
+        }
+
+        .chart-placeholder {
+            min-height: 100px;
+            background-color: var(--background-color);
+            border: 1px dashed var(--border-color);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-light);
+            font-style: italic;
+            margin-top: 8px;
+            padding: 10px;
+            text-align: center;
+            font-size: 0.9rem;
+        }
+
+        .loading-spinner {
+            grid-column: 1 / -1;
+            border: 4px solid var(--border-color);
+            border-top: 4px solid var(--primary-color);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 50px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error-message {
+            grid-column: 1 / -1;
+            color: #EF4444; /* Red-500 */
+            background-color: #FEE2E2; /* Red-100 */
+            padding: 16px;
+            border-radius: 8px;
+            border: 1px solid #FCA5A5; /* Red-300 */
+            margin-top: 20px;
+            text-align: center;
+            font-weight: 500;
+        }
+
+        /* Responsive typography adjustments */
+        @media (max-width: var(--breakpoint-sm)) {
+            header h1 {
+                font-size: 2rem;
+            }
+            header p {
+                font-size: 1rem;
+            }
+            .card h2 {
+                font-size: 1.3rem;
+            }
+            .metric-item span {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Sales Analysis Dashboard</h1>
+        <p>A comprehensive overview of sales performance, including key metrics, top products, sales by category, and monthly trends.</p>
+    </header>
+
+    <div class="container" id="dashboard-container">
+        <div class="loading-spinner" id="loading-spinner"></div>
+        <div id="error-display" class="error-message" style="display: none;"></div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const dashboardContainer = document.getElementById('dashboard-container');
+            const loadingSpinner = document.getElementById('loading-spinner');
+            const errorDisplay = document.getElementById('error-display');
+
+            async function fetchData() {
+                try {
+                    const response = await fetch('result.json');
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return await response.json();
+                } catch (error) {
+                    console.error('Failed to fetch data:', error);
+                    return { error: error.message || 'Unknown network error.' };
+                }
+            }
+
+            async function renderDashboard() {
+                loadingSpinner.style.display = 'block';
+                // Initially hide error message
+                errorDisplay.style.display = 'none'; 
+                dashboardContainer.innerHTML = ''; // Clear previous content except error/spinner
+
+                const data = await fetchData();
+
+                loadingSpinner.style.display = 'none';
+
+                if (!data || data.error) {
+                    errorDisplay.style.display = 'block';
+                    errorDisplay.textContent = `Error loading data: ${data ? data.error : 'Network or file issue.'}`;
+                    dashboardContainer.appendChild(errorDisplay); 
+                    return;
+                }
+
+                // Overall Metrics Card
+                const overallMetricsCard = createCard('Overall Sales Metrics');
+                const metricsGrid = document.createElement('div');
+                metricsGrid.className = 'metric-grid';
+
+                const metrics = [
+                    { label: 'Total Sales Amount', value: formatCurrency(data.overall_metrics.total_sales_amount) },
+                    { label: 'Total Orders', value: formatNumber(data.overall_metrics.total_orders) },
+                    { label: 'Average Order Value', value: formatCurrency(data.overall_metrics.average_order_value) },
+                    { label: 'Period Start', value: data.overall_metrics.start_date || 'N/A' },
+                    { label: 'Period End', value: data.overall_metrics.end_date || 'N/A' }
+                ];
+
+                metrics.forEach(metric => {
+                    const metricItem = document.createElement('div');
+                    metricItem.className = 'metric-item';
+                    metricItem.innerHTML = `<strong>${metric.label}</strong><span>${metric.value}</span>`;
+                    metricsGrid.appendChild(metricItem);
+                });
+                overallMetricsCard.querySelector('.card-content').appendChild(metricsGrid);
+                dashboardContainer.appendChild(overallMetricsCard);
+
+                // Top Products by Sales Card
+                const topProductsCard = createCard('Top 5 Products by Sales');
+                const topProductsList = document.createElement('div');
+                if (data.top_products_by_sales && data.top_products_by_sales.length > 0) {
+                    data.top_products_by_sales.forEach(product => {
+                        topProductsList.innerHTML += `
+                            <div class="list-item">
+                                <span>${product.product_name}</span>
+                                <span>${formatCurrency(product.total_sales)}</span>
+                            </div>
+                        `;
+                    });
+                } else {
+                    topProductsList.innerHTML = '<div class="chart-placeholder">No top products data available.</div>';
+                }
+                topProductsCard.querySelector('.card-content').appendChild(topProductsList);
+                dashboardContainer.appendChild(topProductsCard);
+
+                // Sales by Category Card
+                const salesByCategoryCard = createCard('Sales by Product Category');
+                const salesByCategoryList = document.createElement('div');
+                if (data.sales_by_category && data.sales_by_category.length > 0) {
+                    data.sales_by_category.forEach(category => {
+                        salesByCategoryList.innerHTML += `
+                            <div class="list-item">
+                                <span>${category.product_category}</span>
+                                <span>${formatCurrency(category.total_sales)}</span>
+                            </div>
+                        `;
+                    });
+                } else {
+                    salesByCategoryList.innerHTML = '<div class="chart-placeholder">No sales by category data available.</div>';
+                }
+                salesByCategoryCard.querySelector('.card-content').appendChild(salesByCategoryList);
+                dashboardContainer.appendChild(salesByCategoryCard);
+
+                // Monthly Sales Trend Card
+                const monthlySalesCard = createCard('Monthly Sales Trend');
+                const monthlySalesList = document.createElement('div');
+                const monthlySalesData = Object.entries(data.monthly_sales_trend || {}).sort(([a,], [b,]) => a.localeCompare(b));
+                if (monthlySalesData.length > 0) {
+                    monthlySalesData.forEach(([month, sales]) => {
+                        monthlySalesList.innerHTML += `
+                            <div class="list-item">
+                                <span>${month}</span>
+                                <span>${formatCurrency(sales)}</span>
+                            </div>
+                        `;
+                    });
+                } else {
+                    monthlySalesList.innerHTML = '<div class="chart-placeholder">No monthly sales trend data available.</div>';
+                }
+                monthlySalesCard.querySelector('.card-content').appendChild(monthlySalesList);
+                dashboardContainer.appendChild(monthlySalesCard);
+
+                // Top Customers by Sales Card
+                const topCustomersCard = createCard('Top 5 Customers by Sales');
+                const topCustomersList = document.createElement('div');
+                if (data.top_customers_by_sales && data.top_customers_by_sales.length > 0) {
+                    data.top_customers_by_sales.forEach(customer => {
+                        topCustomersList.innerHTML += `
+                            <div class="list-item">
+                                <span>Customer ID: ${customer.customer_id}</span>
+                                <span>${formatCurrency(customer.total_sales)}</span>
+                            </div>
+                        `;
+                    });
+                } else {
+                    topCustomersList.innerHTML = '<div class="chart-placeholder">No top customers data available.</div>';
+                }
+                topCustomersCard.querySelector('.card-content').appendChild(topCustomersList);
+                dashboardContainer.appendChild(topCustomersCard);
+            }
+
+            // Helper function to create a card
+            function createCard(title) {
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.innerHTML = `
+                    <h2>${title}</h2>
+                    <div class="card-content"></div>
+                `;
+                return card;
+            }
+
+            // Helper function to format currency
+            function formatCurrency(value) {
+                return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(value);
+            }
+
+            // Helper function to format numbers
+            function formatNumber(value) {
+                return new Intl.NumberFormat('en-US').format(value);
+            }
+
+            renderDashboard();
+        });
+    </script>
+</body>
+</html>
